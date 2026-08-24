@@ -1,19 +1,20 @@
 :root {
-  --bg: #0d1b2a;
-  --surface: #152030;
-  --card: #1c2d3e;
-  --card-border: #253a4f;
-  --accent: #ff6200;
-  --accent-dark: #e45700;
-  --brand-blue: #003082;
-  --brand-blue-mid: #1a4a9f;
-  --text: #e8edf5;
-  --muted: #7a9ab8;
-  --border: #253a4f;
-  --danger: #c0392b;
-  --danger-dark: #a93226;
-  --glow-color: #ff6200;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --orange: #ff6200;
+  --orange-dark: #e45700;
+  --navy: #1a1a8c;
+  --navy-dark: #12127a;
+  --white: #ffffff;
+  --off-white: #f5f5f5;
+  --muted: #5a5aaa;
+  --border: rgba(26, 26, 140, 0.15);
+  --surface: #eeeef8;
+  /* session screen stays dark like a call UI */
+  --session-bg: #0d1117;
+  --session-card: #161b22;
+  --session-card-border: #21262d;
+  --session-text: #e6edf3;
+  --session-muted: #8b949e;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -21,14 +22,14 @@
 html, body {
   height: 100%;
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
+  background: var(--orange);
+  color: var(--navy);
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
 
-/* ── Screens ────────────────────────────────────────────────────────── */
+/* ── Screens ───────────────────────────────────────────────────────── */
 .screen {
   display: none;
   height: 100dvh;
@@ -38,24 +39,24 @@ html, body {
 }
 .screen.active { display: flex; }
 
-/* ── Join Screen ────────────────────────────────────────────────────── */
+/* ── Join Screen ───────────────────────────────────────────────────── */
 #screen-join {
   justify-content: space-between;
   background:
-    radial-gradient(circle at top right, rgba(255,98,0,0.12), transparent 45%),
-    radial-gradient(circle at bottom left, rgba(0,48,130,0.18), transparent 50%),
-    var(--bg);
+    radial-gradient(circle at top left, rgba(255,255,255,0.18), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(26,26,140,0.18), transparent 50%),
+    var(--orange);
   padding: 24px 16px env(safe-area-inset-bottom, 16px);
 }
 
 .join-card {
   width: 100%;
   max-width: 420px;
-  background: var(--card);
-  border: 1px solid var(--card-border);
+  background: var(--white);
+  border: none;
   border-radius: 20px;
   padding: 32px 24px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 60px rgba(26,26,140,0.22), 0 2px 8px rgba(0,0,0,0.1);
   margin: auto 0;
 }
 
@@ -65,13 +66,10 @@ html, body {
 }
 .app-header h1 {
   margin: 0;
-  font-size: 2.4rem;
+  font-size: 2.6rem;
   letter-spacing: 2px;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--accent) 0%, #ff9340 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-weight: 800;
+  color: var(--orange);
 }
 .tagline {
   color: var(--muted);
@@ -87,28 +85,24 @@ html, body {
 }
 .form-group label {
   font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--muted);
+  font-weight: 700;
+  color: var(--navy);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 .form-group input {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--off-white);
+  border: 2px solid var(--border);
   border-radius: 12px;
-  color: var(--text);
+  color: var(--navy);
   font-size: 1rem;
   padding: 14px 16px;
   outline: none;
   transition: border-color 0.2s;
   width: 100%;
 }
-.form-group input:focus {
-  border-color: var(--accent);
-}
-.form-group input.input-error {
-  border-color: #e74c3c;
-}
+.form-group input:focus { border-color: var(--orange); }
+.form-group input.input-error { border-color: #e74c3c; }
 
 .error-text {
   color: #e74c3c;
@@ -116,9 +110,10 @@ html, body {
   text-align: center;
   margin: 0 0 12px;
   padding: 10px 14px;
-  background: rgba(231, 76, 60, 0.1);
-  border: 1px solid rgba(231, 76, 60, 0.3);
+  background: rgba(231,76,60,0.08);
+  border: 1px solid rgba(231,76,60,0.25);
   border-radius: 10px;
+  font-weight: 600;
   animation: shake 0.3s ease;
 }
 
@@ -134,52 +129,54 @@ html, body {
   border-radius: 999px;
   border: none;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   transition: transform 0.1s ease, opacity 0.2s ease, background 0.15s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  letter-spacing: 0.3px;
 }
 .btn:active { transform: scale(0.96); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .btn-primary {
-  background: var(--accent);
-  color: #fff;
+  background: var(--orange);
+  color: var(--white);
+  box-shadow: 0 4px 14px rgba(255,98,0,0.4);
 }
-.btn-primary:hover:not(:disabled) { background: var(--accent-dark); }
+.btn-primary:hover:not(:disabled) {
+  background: var(--orange-dark);
+  box-shadow: 0 4px 18px rgba(255,98,0,0.55);
+}
 
 .btn-full { width: 100%; }
 
 .btn-danger {
-  background: var(--danger);
-  color: #fff;
+  background: #c0392b;
+  color: var(--white);
 }
-.btn-danger:hover:not(:disabled) { background: var(--danger-dark); }
+.btn-danger:hover:not(:disabled) { background: #a93226; }
 
 .app-footer {
-  color: var(--muted);
+  color: rgba(255,255,255,0.75);
   font-size: 0.78rem;
   padding-bottom: 8px;
   text-align: center;
 }
 
-/* ── Session Screen ─────────────────────────────────────────────────── */
+/* ── Session Screen (dark call UI) ─────────────────────────────────── */
 #screen-session {
   position: relative;
   justify-content: flex-start;
-  background: var(--bg);
+  background: var(--session-bg);
   overflow: hidden;
 }
 
-/* PTT zone covers the whole session screen, below the header but above nothing.
-   Pointer events on action-bar buttons are above this via z-index. */
 #ptt-zone {
   position: absolute;
   inset: 0;
   z-index: 1;
-  /* transparent; catches pointer events for PTT */
   background: transparent;
 }
 
@@ -191,23 +188,23 @@ html, body {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px 10px;
-  background: rgba(13, 27, 42, 0.92);
+  background: rgba(13,17,23,0.95);
   backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--orange);
   padding-top: max(16px, env(safe-area-inset-top, 16px));
 }
 
 .session-label {
   font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--muted);
+  font-weight: 700;
+  color: var(--orange);
   letter-spacing: 0.5px;
 }
 
 .ptt-indicator {
   font-size: 0.82rem;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--orange);
   animation: pulse-text 0.8s ease-in-out infinite alternate;
 }
 
@@ -216,7 +213,7 @@ html, body {
   to   { opacity: 1; }
 }
 
-/* ── Participants Grid ───────────────────────────────────────────────── */
+/* ── Participants Grid ──────────────────────────────────────────────── */
 .participants-grid {
   position: relative;
   z-index: 2;
@@ -227,22 +224,20 @@ html, body {
   gap: 4px;
   padding: 4px;
   overflow-y: auto;
-  pointer-events: none; /* let PTT zone handle pointer */
+  pointer-events: none;
 }
 
-/* Single participant: full width */
 .participants-grid:has(.participant-card:only-child) {
   grid-template-columns: 1fr;
 }
 
-/* 3 participants: 2 top, 1 bottom-centered */
 .participants-grid:has(.participant-card:nth-child(3):last-child) .participant-card:last-child {
   grid-column: 1 / -1;
 }
 
 .participant-card {
   aspect-ratio: 3 / 4;
-  background: var(--card);
+  background: var(--session-card);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -256,11 +251,11 @@ html, body {
 }
 
 .participant-card.speaking {
-  border-color: var(--glow-color);
+  border-color: var(--orange);
   box-shadow:
-    0 0 0 2px rgba(255, 98, 0, 0.4),
-    0 0 24px rgba(255, 98, 0, 0.35),
-    inset 0 0 40px rgba(255, 98, 0, 0.08);
+    0 0 0 2px rgba(255,98,0,0.4),
+    0 0 24px rgba(255,98,0,0.35),
+    inset 0 0 40px rgba(255,98,0,0.08);
   animation: glow-pulse 0.8s ease-in-out infinite alternate;
 }
 
@@ -273,25 +268,25 @@ html, body {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-blue-mid) 100%);
+  background: linear-gradient(135deg, var(--navy) 0%, #3a3ab0 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--white);
   text-transform: uppercase;
   flex-shrink: 0;
 }
 
 .participant-card.speaking .participant-avatar {
-  background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+  background: linear-gradient(135deg, var(--orange-dark) 0%, var(--orange) 100%);
 }
 
 .participant-name {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--session-text);
   text-align: center;
   padding: 0 8px;
   white-space: nowrap;
@@ -302,25 +297,19 @@ html, body {
 
 .participant-mic {
   font-size: 0.7rem;
-  color: var(--muted);
+  color: var(--session-muted);
 }
-.participant-card.speaking .participant-mic {
-  color: var(--accent);
-}
+.participant-card.speaking .participant-mic { color: var(--orange); }
 
-/* Self card subtle highlight */
-.participant-card.self {
-  background: #1a2f45;
-}
+.participant-card.self { background: #1c2333; }
 
-/* PTT hint text */
 .ptt-hint {
   position: relative;
   z-index: 2;
   margin: 0;
   padding: 6px 0;
   font-size: 0.72rem;
-  color: var(--muted);
+  color: var(--session-muted);
   text-align: center;
   pointer-events: none;
 }
@@ -328,15 +317,15 @@ html, body {
 /* ── Action bar ─────────────────────────────────────────────────────── */
 .action-bar {
   position: relative;
-  z-index: 10; /* above PTT zone */
+  z-index: 10;
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 12px 24px max(12px, env(safe-area-inset-bottom, 12px));
-  background: rgba(13, 27, 42, 0.92);
+  background: rgba(13,17,23,0.95);
   backdrop-filter: blur(8px);
-  border-top: 1px solid var(--border);
+  border-top: 2px solid var(--orange);
   gap: 16px;
 }
 
@@ -346,16 +335,14 @@ html, body {
   font-size: 0.95rem;
 }
 
-/* ── PTT active visual feedback ─────────────────────────────────────── */
 body.ptt-active #ptt-zone::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background: radial-gradient(ellipse at center, rgba(255,98,0,0.07) 0%, transparent 70%);
   pointer-events: none;
 }
 
-/* ── Empty state ────────────────────────────────────────────────────── */
 .empty-state {
   grid-column: 1 / -1;
   display: flex;
@@ -363,7 +350,7 @@ body.ptt-active #ptt-zone::after {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  color: var(--muted);
+  color: var(--session-muted);
   padding: 48px 24px;
   text-align: center;
   pointer-events: none;
