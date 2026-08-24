@@ -67,10 +67,8 @@ html, body {
 .app-header h1 {
   margin: 0;
   font-size: 2.6rem;
-  letter-spacing: 0.55em;
   font-weight: 800;
   color: var(--orange);
-  text-indent: 0.55em; /* compensate for trailing letter-spacing */
 }
 .tagline {
   color: var(--muted);
