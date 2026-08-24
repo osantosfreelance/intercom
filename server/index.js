@@ -147,11 +147,15 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`   Local:   ${proto}://localhost:${PORT}`);
 
   if (inDocker) {
-    console.log('\n   ⚠️  Running inside Docker.');
-    console.log(`   Access the app using your HOST machine's IP on port ${PORT}:`);
-    console.log(`   e.g.  ${proto}://<your-laptop-ip>:${PORT}`);
+    const hostIP = process.env.HOST_IP;
+    if (hostIP) {
+      console.log(`\n   Network:  ${proto}://${hostIP}:${PORT}`);
+    } else {
+      console.log('\n   Tip: set HOST_IP in docker-compose.yml to see your LAN URL here.');
+      console.log(`   Or run:  HOST_IP=$(hostname -I | awk '{print $1}') docker compose up -d`);
+    }
     if (useTLS) {
-      console.log('   ⚠️  Self-signed cert: browser will warn — click "Advanced" → "Proceed" once.\n');
+      console.log('   ⚠️  Self-signed cert: browser will warn — click "Advanced" → "Proceed" once.');
     }
   } else {
     const ips = getHostIPs();
@@ -160,5 +164,5 @@ server.listen(PORT, '0.0.0.0', () => {
       ips.forEach((ip) => console.log(`     ${proto}://${ip.split(': ')[1]}:${PORT}  (${ip.split(':')[0]})`));
     }
   }
-  console.log(`   Valid session code: ${VALID_SESSION}\n`);
+  console.log(`\n   Valid session code: ${VALID_SESSION}\n`);
 });
