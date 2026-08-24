@@ -51,7 +51,7 @@ html, body {
 
 .join-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 560px;
   background: var(--white);
   border: none;
   border-radius: 20px;
