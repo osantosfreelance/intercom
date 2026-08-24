@@ -1,0 +1,372 @@
+:root {
+  --bg: #0d1b2a;
+  --surface: #152030;
+  --card: #1c2d3e;
+  --card-border: #253a4f;
+  --accent: #ff6200;
+  --accent-dark: #e45700;
+  --brand-blue: #003082;
+  --brand-blue-mid: #1a4a9f;
+  --text: #e8edf5;
+  --muted: #7a9ab8;
+  --border: #253a4f;
+  --danger: #c0392b;
+  --danger-dark: #a93226;
+  --glow-color: #ff6200;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* ── Screens ────────────────────────────────────────────────────────── */
+.screen {
+  display: none;
+  height: 100dvh;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+}
+.screen.active { display: flex; }
+
+/* ── Join Screen ────────────────────────────────────────────────────── */
+#screen-join {
+  justify-content: space-between;
+  background:
+    radial-gradient(circle at top right, rgba(255,98,0,0.12), transparent 45%),
+    radial-gradient(circle at bottom left, rgba(0,48,130,0.18), transparent 50%),
+    var(--bg);
+  padding: 24px 16px env(safe-area-inset-bottom, 16px);
+}
+
+.join-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 32px 24px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  margin: auto 0;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.app-header h1 {
+  margin: 0;
+  font-size: 2.4rem;
+  letter-spacing: 2px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent) 0%, #ff9340 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.tagline {
+  color: var(--muted);
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.form-group label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.form-group input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 1rem;
+  padding: 14px 16px;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+.form-group input:focus {
+  border-color: var(--accent);
+}
+.form-group input.input-error {
+  border-color: #e74c3c;
+}
+
+.error-text {
+  color: #e74c3c;
+  font-size: 0.88rem;
+  text-align: center;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  background: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  border-radius: 10px;
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-6px); }
+  75%       { transform: translateX(6px); }
+}
+
+.btn {
+  font-size: 1rem;
+  padding: 14px 24px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.1s ease, opacity 0.2s ease, background 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn:active { transform: scale(0.96); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) { background: var(--accent-dark); }
+
+.btn-full { width: 100%; }
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+.btn-danger:hover:not(:disabled) { background: var(--danger-dark); }
+
+.app-footer {
+  color: var(--muted);
+  font-size: 0.78rem;
+  padding-bottom: 8px;
+  text-align: center;
+}
+
+/* ── Session Screen ─────────────────────────────────────────────────── */
+#screen-session {
+  position: relative;
+  justify-content: flex-start;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* PTT zone covers the whole session screen, below the header but above nothing.
+   Pointer events on action-bar buttons are above this via z-index. */
+#ptt-zone {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  /* transparent; catches pointer events for PTT */
+  background: transparent;
+}
+
+.session-header {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 10px;
+  background: rgba(13, 27, 42, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding-top: max(16px, env(safe-area-inset-top, 16px));
+}
+
+.session-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+}
+
+.ptt-indicator {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
+  animation: pulse-text 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-text {
+  from { opacity: 0.7; }
+  to   { opacity: 1; }
+}
+
+/* ── Participants Grid ───────────────────────────────────────────────── */
+.participants-grid {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 4px;
+  overflow-y: auto;
+  pointer-events: none; /* let PTT zone handle pointer */
+}
+
+/* Single participant: full width */
+.participants-grid:has(.participant-card:only-child) {
+  grid-template-columns: 1fr;
+}
+
+/* 3 participants: 2 top, 1 bottom-centered */
+.participants-grid:has(.participant-card:nth-child(3):last-child) .participant-card:last-child {
+  grid-column: 1 / -1;
+}
+
+.participant-card {
+  aspect-ratio: 3 / 4;
+  background: var(--card);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 2px solid transparent;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.participant-card.speaking {
+  border-color: var(--glow-color);
+  box-shadow:
+    0 0 0 2px rgba(255, 98, 0, 0.4),
+    0 0 24px rgba(255, 98, 0, 0.35),
+    inset 0 0 40px rgba(255, 98, 0, 0.08);
+  animation: glow-pulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes glow-pulse {
+  from { box-shadow: 0 0 0 2px rgba(255,98,0,0.3), 0 0 18px rgba(255,98,0,0.25), inset 0 0 30px rgba(255,98,0,0.06); }
+  to   { box-shadow: 0 0 0 3px rgba(255,98,0,0.5), 0 0 32px rgba(255,98,0,0.45), inset 0 0 50px rgba(255,98,0,0.12); }
+}
+
+.participant-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-blue-mid) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.participant-card.speaking .participant-avatar {
+  background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%);
+}
+
+.participant-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  padding: 0 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.participant-mic {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.participant-card.speaking .participant-mic {
+  color: var(--accent);
+}
+
+/* Self card subtle highlight */
+.participant-card.self {
+  background: #1a2f45;
+}
+
+/* PTT hint text */
+.ptt-hint {
+  position: relative;
+  z-index: 2;
+  margin: 0;
+  padding: 6px 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: center;
+  pointer-events: none;
+}
+
+/* ── Action bar ─────────────────────────────────────────────────────── */
+.action-bar {
+  position: relative;
+  z-index: 10; /* above PTT zone */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 24px max(12px, env(safe-area-inset-bottom, 12px));
+  background: rgba(13, 27, 42, 0.92);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--border);
+  gap: 16px;
+}
+
+.action-btn {
+  border-radius: 16px;
+  padding: 12px 28px;
+  font-size: 0.95rem;
+}
+
+/* ── PTT active visual feedback ─────────────────────────────────────── */
+body.ptt-active #ptt-zone::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(255,98,0,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ── Empty state ────────────────────────────────────────────────────── */
+.empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--muted);
+  padding: 48px 24px;
+  text-align: center;
+  pointer-events: none;
+}
+.empty-state svg { opacity: 0.3; }
+.empty-state p { margin: 0; font-size: 0.9rem; }

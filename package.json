@@ -1,0 +1,18 @@
+{
+  "name": "intercom",
+  "version": "1.0.0",
+  "description": "Push-to-talk group audio web app for company townhalls.",
+  "private": true,
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "helmet": "^8.3.0",
+    "socket.io": "^4.7.5"
+  }
+}

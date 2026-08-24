@@ -1,0 +1,8 @@
+services:
+  intercom:
+    build: .
+    image: intercom:latest
+    container_name: intercom
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
