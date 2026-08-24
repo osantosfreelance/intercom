@@ -1,14 +1,25 @@
 'use strict';
 
 const express = require('express');
+const https = require('https');
 const http = require('http');
 const path = require('path');
+const fs = require('fs');
 const os = require('os');
 const { Server } = require('socket.io');
 const helmet = require('helmet');
 
 const app = express();
-const server = http.createServer(app);
+
+// Use HTTPS if cert files exist (generated in Docker), otherwise fall back to HTTP for local dev
+const certPath = path.join(__dirname, 'cert.pem');
+const keyPath  = path.join(__dirname, 'key.pem');
+const useTLS   = fs.existsSync(certPath) && fs.existsSync(keyPath);
+
+const server = useTLS
+  ? https.createServer({ cert: fs.readFileSync(certPath), key: fs.readFileSync(keyPath) }, app)
+  : http.createServer(app);
+
 const io = new Server(server, {
   cors: { origin: '*' },
 });
@@ -128,21 +139,26 @@ function getHostIPs() {
 }
 
 server.listen(PORT, '0.0.0.0', () => {
+  const proto = useTLS ? 'https' : 'http';
   const inDocker = process.env.container === 'docker' ||
-    require('fs').existsSync('/.dockerenv');
+    fs.existsSync('/.dockerenv');
 
-  console.log(`\n🎙  intercom listening on port ${PORT}`);
-  console.log(`   Local:   http://localhost:${PORT}`);
+  console.log(`\n🎙  intercom listening on ${proto} port ${PORT}`);
+  console.log(`   Local:   ${proto}://localhost:${PORT}`);
 
-  const ips = getHostIPs();
   if (inDocker) {
     console.log('\n   ⚠️  Running inside Docker.');
-    console.log('   Access the app using your HOST machine\'s IP on port ' + PORT + ':');
-    console.log(`   e.g.  http://<your-laptop-ip>:${PORT}`);
-    console.log('   (run `ipconfig` on Windows or `ip a` on Linux to find your LAN IP)\n');
-  } else if (ips.length) {
-    console.log('   Network:');
-    ips.forEach((ip) => console.log(`     http://${ip.split(': ')[1]}:${PORT}  (${ip.split(':')[0]})`));
+    console.log(`   Access the app using your HOST machine's IP on port ${PORT}:`);
+    console.log(`   e.g.  ${proto}://<your-laptop-ip>:${PORT}`);
+    if (useTLS) {
+      console.log('   ⚠️  Self-signed cert: browser will warn — click "Advanced" → "Proceed" once.\n');
+    }
+  } else {
+    const ips = getHostIPs();
+    if (ips.length) {
+      console.log('   Network:');
+      ips.forEach((ip) => console.log(`     ${proto}://${ip.split(': ')[1]}:${PORT}  (${ip.split(':')[0]})`));
+    }
   }
   console.log(`   Valid session code: ${VALID_SESSION}\n`);
 });
