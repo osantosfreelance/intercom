@@ -128,12 +128,21 @@ function getHostIPs() {
 }
 
 server.listen(PORT, '0.0.0.0', () => {
+  const inDocker = process.env.container === 'docker' ||
+    require('fs').existsSync('/.dockerenv');
+
   console.log(`\n🎙  intercom listening on port ${PORT}`);
   console.log(`   Local:   http://localhost:${PORT}`);
+
   const ips = getHostIPs();
-  if (ips.length) {
+  if (inDocker) {
+    console.log('\n   ⚠️  Running inside Docker.');
+    console.log('   Access the app using your HOST machine\'s IP on port ' + PORT + ':');
+    console.log(`   e.g.  http://<your-laptop-ip>:${PORT}`);
+    console.log('   (run `ipconfig` on Windows or `ip a` on Linux to find your LAN IP)\n');
+  } else if (ips.length) {
     console.log('   Network:');
     ips.forEach((ip) => console.log(`     http://${ip.split(': ')[1]}:${PORT}  (${ip.split(':')[0]})`));
   }
-  console.log(`\n   Valid session code: ${VALID_SESSION}\n`);
+  console.log(`   Valid session code: ${VALID_SESSION}\n`);
 });
