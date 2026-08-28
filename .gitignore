@@ -1,3 +1,11 @@
 node_modules/
 .env
 *.log
+.gcloudignore
+cloudbuild.yaml
+ING.README.md
+scripts/deploy-gcp.ps1
+scripts/deploy-gcp-local.ps1
+scripts/gcp/provision-turn.ps1
+scripts/gcp/recreate-one-day-sandbox.ps1
+scripts/gcp/turn-startup.sh
