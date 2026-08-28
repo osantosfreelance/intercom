@@ -48,8 +48,8 @@ Requires Node.js ≥ 18.
 
 - **Noise suppression is off** — push-to-talk means there's nothing to suppress. Your device's default mic processing is used.
 - **Audio quality** — 48 kHz mono, echo cancellation on, for clear voice reproduction.
-- **STUN only** — uses Google's free STUN server. For cross-internet use, add a TURN server in `public/app.js` under `RTC_CONFIG`.
-- **One session** — only `tech-be-townhall-2k26` is valid. To change or add sessions, edit `VALID_SESSION` in `server/index.js`.
+- **STUN/TURN** — default uses Google's free STUN server. For cross-internet audio, set `TURN_URLS`, `TURN_USERNAME`, `TURN_CREDENTIAL` (or `ICE_SERVERS_JSON`) on the server.
+- **One session** — default is `tech-be-townhall-2k26`. Override it with `SESSION_CODE` env var (recommended in Cloud Run deployment).
 
 ## Stack
 

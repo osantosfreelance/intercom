@@ -6,6 +6,7 @@ let localStream = null;
 let mySocketId = null;
 let myAlias = null;
 let isSpeaking = false;
+const pendingAudioElements = new Set();
 
 // peers[socketId] = { alias, pc (RTCPeerConnection), speaking }
 const peers = {};
@@ -23,10 +24,27 @@ const pttZone       = document.getElementById('ptt-zone');
 const pttIndicator  = document.getElementById('ptt-indicator');
 
 // ── RTC config ─────────────────────────────────────────────────────────────
-// Free public STUN — enough for LAN/intranet use; add TURN for cross-NAT if needed
-const RTC_CONFIG = {
+// Default STUN config. Server can override with TURN via /api/rtc-config.
+let RTC_CONFIG = {
   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
 };
+
+async function loadRtcConfig() {
+  try {
+    const response = await fetch('/api/rtc-config', { cache: 'no-store' });
+    if (!response.ok) return;
+    const config = await response.json();
+    if (
+      config &&
+      Array.isArray(config.iceServers) &&
+      config.iceServers.every((entry) => entry && (typeof entry.urls === 'string' || Array.isArray(entry.urls)))
+    ) {
+      RTC_CONFIG = config;
+    }
+  } catch {
+    // Keep default STUN config if endpoint is unavailable.
+  }
+}
 
 // ── Utility ────────────────────────────────────────────────────────────────
 function initials(alias) {
@@ -117,6 +135,22 @@ function setSpeakingCard(socketId, speaking) {
   card.querySelector('.participant-mic').textContent = speaking ? '🎙' : '🔇';
 }
 
+async function tryPlayAudio(audio) {
+  try {
+    await audio.play();
+    pendingAudioElements.delete(audio);
+  } catch {
+    pendingAudioElements.add(audio);
+  }
+}
+
+async function unlockPendingAudio() {
+  const pending = Array.from(pendingAudioElements);
+  for (const audio of pending) {
+    await tryPlayAudio(audio);
+  }
+}
+
 // ── WebRTC ─────────────────────────────────────────────────────────────────
 async function createPeer(remoteId, polite) {
   const pc = new RTCPeerConnection(RTC_CONFIG);
@@ -132,13 +166,19 @@ async function createPeer(remoteId, polite) {
   // Receive remote audio
   pc.ontrack = ({ streams }) => {
     if (!streams[0]) return;
+    const existing = document.querySelector(`audio[data-peer="${remoteId}"]`);
+    if (existing) existing.remove();
+
     const audio = document.createElement('audio');
     audio.autoplay = true;
+    audio.playsInline = true;
+    audio.muted = false;
     audio.srcObject = streams[0];
     // Keep audio elements off-screen
     audio.style.display = 'none';
     audio.dataset.peer = remoteId;
     document.body.appendChild(audio);
+    void tryPlayAudio(audio);
   };
 
   // Send ICE candidates via Socket.IO
@@ -262,6 +302,7 @@ function stopSpeaking() {
 // PTT zone: pointerdown = start speaking, pointerup/cancel = stop
 pttZone.addEventListener('pointerdown', (e) => {
   e.preventDefault();
+  void unlockPendingAudio();
   startSpeaking();
 });
 pttZone.addEventListener('pointerup', (e) => {
@@ -271,10 +312,29 @@ pttZone.addEventListener('pointerup', (e) => {
 pttZone.addEventListener('pointercancel', stopSpeaking);
 pttZone.addEventListener('pointerleave', stopSpeaking);
 
+// Prevent text selection on touch devices
+pttZone.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+}, { passive: false });
+pttZone.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+}, { passive: false });
+pttZone.addEventListener('touchend', (e) => {
+  e.preventDefault();
+}, { passive: false });
+
+// Prevent selection start on the entire session screen
+document.addEventListener('selectstart', (e) => {
+  if (screenSession.classList.contains('active')) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
 // Also handle keyboard (spacebar) for desktop
 document.addEventListener('keydown', (e) => {
   if (e.code === 'Space' && screenSession.classList.contains('active') && !e.repeat) {
     e.preventDefault();
+    void unlockPendingAudio();
     startSpeaking();
   }
 });
@@ -317,6 +377,7 @@ btnJoin.addEventListener('click', handleJoin);
 [inputAlias, inputCode].forEach((el) =>
   el.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleJoin(); })
 );
+document.addEventListener('click', () => { void unlockPendingAudio(); }, { passive: true });
 
 async function handleJoin() {
   clearJoinError();
@@ -334,6 +395,8 @@ async function handleJoin() {
 
   btnJoin.disabled = true;
   btnJoin.textContent = 'Connecting…';
+
+  await loadRtcConfig();
 
   // Request mic access first
   try {

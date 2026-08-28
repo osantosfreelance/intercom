@@ -11,10 +11,12 @@ const helmet = require('helmet');
 
 const app = express();
 
-// Use HTTPS if cert files exist (generated in Docker), otherwise fall back to HTTP for local dev
+// Use HTTPS if cert files exist (generated in local Docker), unless FORCE_HTTP=true.
+// Cloud Run terminates TLS at the platform edge and forwards HTTP to the container.
 const certPath = path.join(__dirname, 'cert.pem');
 const keyPath  = path.join(__dirname, 'key.pem');
-const useTLS   = fs.existsSync(certPath) && fs.existsSync(keyPath);
+const forceHttp = String(process.env.FORCE_HTTP || '').toLowerCase() === 'true';
+const useTLS = !forceHttp && fs.existsSync(certPath) && fs.existsSync(keyPath);
 
 const server = useTLS
   ? https.createServer({ cert: fs.readFileSync(certPath), key: fs.readFileSync(keyPath) }, app)
@@ -25,7 +27,52 @@ const io = new Server(server, {
 });
 
 const PORT = process.env.PORT || 3001;
-const VALID_SESSION = 'tech-be-townhall-2k26';
+const VALID_SESSION = process.env.SESSION_CODE || 'tech-be-townhall-2k26';
+
+function parseIceServers() {
+  const defaultIceServers = [{ urls: 'stun:stun.l.google.com:19302' }];
+  const iceServersJson = process.env.ICE_SERVERS_JSON;
+  const turnUrls = process.env.TURN_URLS;
+  const turnUsername = process.env.TURN_USERNAME;
+  const turnCredential = process.env.TURN_CREDENTIAL;
+
+  if (iceServersJson) {
+    try {
+      const parsed = JSON.parse(iceServersJson);
+      if (
+        Array.isArray(parsed) &&
+        parsed.every((entry) => entry && (typeof entry.urls === 'string' || Array.isArray(entry.urls)))
+      ) {
+        return parsed;
+      }
+      console.warn('ICE_SERVERS_JSON is invalid; falling back to default STUN config.');
+    } catch (err) {
+      console.warn(`Failed to parse ICE_SERVERS_JSON: ${err.message}`);
+    }
+  }
+
+  if (turnUrls) {
+    const urls = turnUrls.split(/[;,]/).map((url) => url.trim()).filter(Boolean);
+    if (urls.length > 0) {
+      const turnServer = {
+        urls,
+      };
+      if (turnUsername) turnServer.username = turnUsername;
+      if (turnCredential) turnServer.credential = turnCredential;
+      return [defaultIceServers[0], turnServer];
+    }
+  }
+
+  return defaultIceServers;
+}
+
+const RTC_CONFIG = {
+  iceServers: parseIceServers(),
+};
+const iceTransportPolicy = process.env.ICE_TRANSPORT_POLICY;
+if (iceTransportPolicy === 'all' || iceTransportPolicy === 'relay') {
+  RTC_CONFIG.iceTransportPolicy = iceTransportPolicy;
+}
 
 // Security headers — relaxed for WebRTC + Socket.IO
 app.use(
@@ -38,6 +85,7 @@ app.disable('x-powered-by');
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
+app.get('/api/rtc-config', (_req, res) => res.json(RTC_CONFIG));
 
 // ── In-memory session state ────────────────────────────────────────────────
 // sessions[sessionId] = Map<socketId, { alias, speaking }>

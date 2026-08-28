@@ -27,6 +27,7 @@ html, body {
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  -webkit-user-select: none;
 }
 
 /* ── Screens ───────────────────────────────────────────────────────── */
@@ -170,6 +171,9 @@ html, body {
   justify-content: flex-start;
   background: var(--session-bg);
   overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
 }
 
 #ptt-zone {
@@ -177,6 +181,9 @@ html, body {
   inset: 0;
   z-index: 1;
   background: transparent;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .session-header {
@@ -224,6 +231,8 @@ html, body {
   padding: 4px;
   overflow-y: auto;
   pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .participants-grid:has(.participant-card:only-child) {
